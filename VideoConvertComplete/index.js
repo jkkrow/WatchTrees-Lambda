@@ -9,7 +9,7 @@ exports.handler = async (event) => {
   const { EXT, APPLICATION } = process.env;
   const { key, fileName, treeId, application } = event.detail.userMetadata;
 
-  if (APPLICATION !== (application || 'WatchTrees')) return;
+  if (application !== (APPLICATION || 'WatchTrees')) return;
 
   const client = await clientPromise;
 
