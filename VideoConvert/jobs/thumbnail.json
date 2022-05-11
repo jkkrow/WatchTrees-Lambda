@@ -1,0 +1,27 @@
+{
+  "Name": "File Group",
+  "Outputs": [
+    {
+      "ContainerSettings": {
+        "Container": "RAW"
+      },
+      "VideoDescription": {
+        "CodecSettings": {
+          "Codec": "FRAME_CAPTURE",
+          "FrameCaptureSettings": {
+            "FramerateNumerator": 1,
+            "FramerateDenominator": 5,
+            "MaxCaptures": 2
+          }
+        }
+      },
+      "Extension": "jpg"
+    }
+  ],
+  "OutputGroupSettings": {
+    "Type": "FILE_GROUP_SETTINGS",
+    "FileGroupSettings": {
+      "Destination": ""
+    }
+  }
+}
