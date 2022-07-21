@@ -1,80 +1,35 @@
-require('dotenv').config();
-const { ObjectId } = require('mongodb');
-
-const { clientPromise } = require('./config/db');
+const clientPromise = require('./config/db');
+const { findVideoNodes, updateVideoNodes } = require('./lib/db');
 
 exports.handler = async (event) => {
-  console.log(event);
+  console.log(JSON.stringify(event));
 
   const { EXT, APPLICATION } = process.env;
   const { key, fileName, treeId, application } = event.detail.userMetadata;
 
-  if (application !== (APPLICATION || 'WatchTrees')) return;
+  if (application !== (APPLICATION || 'WatchTrees')) {
+    console.log('Application is not matched');
+    return;
+  }
 
   const client = await clientPromise;
 
-  try {
-    const result = await client
-      .db()
-      .collection('videotrees')
-      .aggregate([
-        { $match: { _id: new ObjectId(treeId) } },
-        {
-          $lookup: {
-            from: 'videonodes',
-            let: { root: '$root', creator: '$info.creator' },
-            as: 'root',
-            pipeline: [
-              { $match: { $expr: { $eq: ['$$root', '$_id'] } } },
-              {
-                $graphLookup: {
-                  from: 'videonodes',
-                  startWith: '$_id',
-                  connectFromField: '_id',
-                  connectToField: 'parentId',
-                  as: 'children',
-                  restrictSearchWithMatch: {
-                    $expr: { $eq: ['$creator', '$$creator'] },
-                  },
-                },
-              },
-            ],
-          },
-        },
-        { $unwind: '$root' },
-      ])
-      .toArray();
+  /**
+   * Find video nodes
+   */
 
-    if (!result.length) {
-      throw new Error('No video found.');
-    }
+  const videoNodes = await findVideoNodes(client, treeId);
 
-    const savedNodes = [result[0].root, ...result[0].root.children];
-    const matchingIds = savedNodes
-      .filter((node) => node.info && node.info.name === fileName)
-      .map((node) => node._id);
+  const matchingIds = videoNodes
+    .filter((node) => node.info && node.info.name === fileName)
+    .map((node) => node._id);
 
-    const updateResult = await client
-      .db()
-      .collection('videonodes')
-      .updateMany(
-        { _id: { $in: matchingIds } },
-        {
-          $set: {
-            'info.url': `${key}.${EXT || 'mpd'}`,
-            'info.isConverted': true,
-          },
-        }
-      );
+  /**
+   * Update video nodes
+   */
 
-    console.log(updateResult);
-
-    if (!updateResult.modifiedCount) {
-      throw new Error('Nothing has updated.');
-    }
-
-    console.log('Updated url successfully!!');
-  } catch (err) {
-    console.log(err);
-  }
+  await updateVideoNodes(client, matchingIds, {
+    'info.url': `${key}.${EXT || 'mpd'}`,
+    'info.isConverted': true,
+  });
 };
