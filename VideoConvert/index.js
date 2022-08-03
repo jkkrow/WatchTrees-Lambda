@@ -1,7 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 
+const clientPromise = require('./config/db');
 const { updateJobSettings, createJob } = require('./lib/job');
+const { validatePremiumUser } = require('./lib/db');
 
 exports.handler = async (event) => {
   console.log(JSON.stringify(event));
@@ -15,6 +17,7 @@ exports.handler = async (event) => {
   /**
    * Define inputs/ouputs, metadata.
    */
+
   const srcKey = decodeURIComponent(event.Records[0].s3.object.key).replace(
     /\+/g,
     ' '
@@ -36,22 +39,38 @@ exports.handler = async (event) => {
   jobMetadata['fileName'] = base;
   jobMetadata['treeId'] = srcKey.split('/')[2];
 
-  let job;
+  /**
+   * Validate premium user
+   */
+
+  const client = await clientPromise();
+  const userId = srcKey.split('/')[1];
+
+  const isPremiumUser = await validatePremiumUser(client, userId);
+
+  if (!isPremiumUser) {
+    console.log('Video convert only available for premium users');
+    return;
+  }
 
   /**
    * Get job settings
    */
-  job = JSON.parse(fs.readFileSync('jobs/video.json'));
 
+  const jobTemplate = JSON.parse(fs.readFileSync('jobs/template.json'));
+
+  const videoJob = JSON.parse(fs.readFileSync('jobs/video.json'));
   const thumbnailJob = JSON.parse(fs.readFileSync('jobs/thumbnail.json'));
 
-  job.Settings.OutputGroups.push(thumbnailJob);
+  jobTemplate.Settings.OutputGroups.push(videoJob);
+  jobTemplate.Settings.OutputGroups.push(thumbnailJob);
 
   /**
    * Parse settings file to update source / destination
    */
-  job = await updateJobSettings(
-    job,
+
+  const job = await updateJobSettings(
+    jobTemplate,
     inputPath,
     outputPath,
     jobMetadata,
@@ -61,6 +80,7 @@ exports.handler = async (event) => {
   /**
    * Submit Job
    */
+
   await createJob(job, MEDIA_CONVERT_ENDPOINT);
 
   return;
