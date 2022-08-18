@@ -7,7 +7,7 @@ exports.handler = async (event) => {
   const { EXT, APPLICATION } = process.env;
   const { key, fileName, treeId, application } = event.detail.userMetadata;
 
-  if (application !== (APPLICATION || 'WatchTrees')) {
+  if (application !== (APPLICATION || 'WatchTree')) {
     console.log('Application is not matched');
     return;
   }
