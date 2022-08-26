@@ -1,5 +1,5 @@
 {
-  "name": "vod-lambdaprocess",
+  "name": "usercreate",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^4.2.0"
+    "braintree": "^3.12.0"
   }
 }
