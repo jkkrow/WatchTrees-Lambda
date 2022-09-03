@@ -38,8 +38,6 @@ It contains functions for following jobs:
 
 - **Update Database when the Convert Job Completed**: It's triggered when the convert job is completed and updates documents related to the video in the MongoDB collection.
 
-- **Create new customer in Braintree Vault**: It's triggered when a new user document is inserted in MongoDB collection, and create a new customer in the Braintree Vault with the corresponding user data.
-
 ## Getting Started
 
 This is an instruction of how to use this code with AWS Lambda function.
