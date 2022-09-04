@@ -10,7 +10,10 @@ exports.validatePremiumUser = async (client, userId) => {
     throw new Error('User not found');
   }
 
-  if (user.isPremium || user.isAdmin) {
+  const isPremium =
+    user.premium.expired && new Date(user.premium.expredAt) > new Date();
+
+  if (isPremium || user.isAdmin) {
     return true;
   }
 
