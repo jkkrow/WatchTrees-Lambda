@@ -11,7 +11,9 @@ exports.validatePremiumUser = async (client, userId) => {
   }
 
   const isPremium =
-    user.premium.expired && new Date(user.premium.expredAt) > new Date();
+    user.isVerified &&
+    user.premium &&
+    new Date(user.premium.expiredAt) > new Date();
 
   if (isPremium || user.isAdmin) {
     return true;
