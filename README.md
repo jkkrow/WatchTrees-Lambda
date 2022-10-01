@@ -14,12 +14,12 @@
     <a href="https://github.com/jkkrow/watchtree-frontend">Frontend App</a>
     ·
     <a href="https://github.com/jkkrow/watchtree-backend">Backend API</a>
-    ·
-    <a href="https://github.com/jkkrow/watchtree-lambda">Lambda Code</a>
   </p>
 </div>
 
 ## Lambda Code
+
+> This repository is archived since the code is moved to main [backend API](https://github.com/jkkrow/watchtree-backend). Now it's triggered by Eventbridge with API destination instead of Lambda function.
 
 This repository is an AWS Lambda function code for [WatchTree](https://watchtree.net) to run serverless jobs.
 
